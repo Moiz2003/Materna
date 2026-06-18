@@ -1,0 +1,3 @@
+# Place synthetic ultrasound images here for testing.
+# Example: data/usg/C-0001.png
+# Images are git-ignored in production; this .gitkeep preserves the directory.

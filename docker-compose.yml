@@ -1,0 +1,70 @@
+# Antenatal Review Board — one service per process.
+# docker compose up brings the whole system live.
+# §3.5 SDD, P14 Playbook.
+
+version: "3.8"
+
+services:
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: arb-orchestrator
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./audit_log:/app/audit_log
+      - ./packets:/app/packets
+    command: uvicorn orchestrator.main:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  agent-intake:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: arb-agent-intake
+    env_file:
+      - .env
+    depends_on:
+      orchestrator:
+        condition: service_healthy
+
+  agent-dating-risk:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: arb-agent-dating-risk
+    env_file:
+      - .env
+    depends_on:
+      orchestrator:
+        condition: service_healthy
+
+  agent-guideline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: arb-agent-guideline
+    env_file:
+      - .env
+    depends_on:
+      orchestrator:
+        condition: service_healthy
+
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: arb-ui
+    ports:
+      - "5173:5173"
+    depends_on:
+      - orchestrator
+    environment:
+      - VITE_API_URL=http://orchestrator:8000

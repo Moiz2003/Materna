@@ -1,0 +1,22 @@
+{
+  "case_id": "C-0001",
+  "demographics": {
+    "age": 29,
+    "parity": "G3P2"
+  },
+  "lmp_date": "2025-12-01",
+  "usg_date": "2026-06-10",
+  "usg_measurement": {
+    "type": "BPD",
+    "value_mm": 58
+  },
+  "vitals": {
+    "bp_systolic": 150,
+    "bp_diastolic": 98
+  },
+  "labs": {
+    "urine_protein": "2+",
+    "fasting_glucose_mg_dl": 104,
+    "hb_g_dl": 10.1
+  }
+}

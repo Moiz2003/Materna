@@ -1,0 +1,47 @@
+# Antenatal ruleset — declarative, auditable, never code (§SDD Appendix C + P5 Playbook).
+# The Guideline Agent and risk/rules.py both read from this file.
+# Changing a threshold here changes behaviour everywhere — no hardcoded duplicates.
+
+rules:
+  - id: PE-001
+    name: Pre-eclampsia suspicion
+    when:
+      bp_systolic_gte: 140
+      or_bp_diastolic_gte: 90
+      and_urine_protein_in: ["1+", "2+", "3+"]
+    flag:
+      type: preeclampsia_suspected
+      severity: high
+    require:
+      - repeat_bp_4h
+      - 24h_urine_protein
+    veto_if_missing: true
+
+  - id: GDM-002
+    name: Gestational diabetes screen
+    when:
+      fasting_glucose_mg_dl_gte: 92
+    flag:
+      type: gdm_suspected
+      severity: moderate
+    require:
+      - ogtt
+    veto_if_missing: true
+
+  - id: ANE-003
+    name: Anaemia
+    when:
+      hb_g_dl_lt: 11.0
+    flag:
+      type: anaemia
+      severity: moderate
+    require:
+      - iron_studies
+    veto_if_missing: false
+
+  - id: DATE-004
+    name: Dating discordance
+    when:
+      discordance_weeks_gte: 2.0
+    action: prefer_ultrasound_dating
+    note: "Re-date by ultrasound; LMP unreliable."
