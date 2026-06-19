@@ -76,18 +76,18 @@ export default function PipelineFlow({ className = '' }) {
   }, [visible]);
 
   return (
-    <section ref={ref} className={`py-20 px-6 ${className}`}>
+    <section ref={ref} className={`py-12 sm:py-20 px-4 sm:px-6 ${className}`}>
       <div className="max-w-5xl mx-auto">
         {/* Header — deliberately different from other section headers */}
-        <div className="mb-12">
-          <div className="flex items-center gap-2 text-teal-400 font-mono text-xs tracking-widest mb-3">
+        <div className="mb-8 sm:mb-12">
+          <div className="flex items-center gap-2 text-teal-400 font-mono text-[10px] sm:text-xs tracking-widest mb-3">
             <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse-glow" />
             PIPELINE
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-text leading-tight max-w-2xl">
+          <h2 className="font-display text-2xl sm:text-4xl font-bold text-text leading-tight max-w-2xl">
             How a case flows through Materna
           </h2>
-          <p className="text-text-muted text-base mt-3 max-w-xl">
+          <p className="text-text-muted text-sm sm:text-base mt-2 sm:mt-3 max-w-xl">
             Five agents coordinate through Band. Every handoff is visible, auditable, and
             hash-chained. No agent calls another directly.
           </p>

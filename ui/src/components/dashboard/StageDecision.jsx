@@ -242,7 +242,7 @@ export default function StageDecision({
           </div>
 
           {/* Horizontal action buttons */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <RippleButton
               variant="primary"
               onClick={() => onDecision('approve')}

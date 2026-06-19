@@ -253,12 +253,12 @@ export default function DashboardPage() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
         <nav className="sticky top-0 z-50 border-b border-border bg-bg-dark/80 backdrop-blur-xl">
-          <div className="px-6 h-16 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3 font-display font-bold text-lg text-teal-400 no-underline">
-              <svg width="28" height="28" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="none" stroke="#2DD4BF" strokeWidth="2" /><circle cx="16" cy="16" r="7" fill="none" stroke="#0D9488" strokeWidth="2" strokeDasharray="4 2" /></svg>
+          <div className="px-4 sm:px-6 h-16 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 font-display font-bold text-base sm:text-lg text-teal-400 no-underline">
+              <svg width="26" height="26" viewBox="0 0 32 32" className="sm:w-7 sm:h-7"><circle cx="16" cy="16" r="14" fill="none" stroke="#2DD4BF" strokeWidth="2" /><circle cx="16" cy="16" r="7" fill="none" stroke="#0D9488" strokeWidth="2" strokeDasharray="4 2" /></svg>
               <span className="hidden sm:inline">Antenatal Review Board</span>
             </Link>
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
               <span className="hidden sm:inline-flex items-center gap-1.5 text-text-muted text-sm">
                 <Stethoscope size={15} className="text-teal-400" /> {reviewer}
               </span>
@@ -268,7 +268,7 @@ export default function DashboardPage() {
         </nav>
 
         {error && (
-          <div className="bg-danger/10 border-b border-danger/20 text-danger text-sm px-6 py-3 flex items-center justify-between gap-4">
+          <div className="bg-danger/10 border-b border-danger/20 text-danger text-xs sm:text-sm px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
             <span className="flex items-center gap-2"><AlertTriangle size={15} /> {error}</span>
             <button onClick={() => setError('')} className="text-danger hover:text-red-400"><X size={18} /></button>
           </div>

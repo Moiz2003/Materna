@@ -22,17 +22,17 @@ const pillars = [
 
 export default function SafetySection() {
   return (
-    <section className="py-20 px-6 bg-bg-mid/30">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 bg-bg-mid/30">
       <div className="max-w-5xl mx-auto">
-        <FadeIn className="text-center mb-12">
-          <span className="text-text-subtle uppercase tracking-widest text-[13px] font-semibold">Safety &amp; Compliance</span>
-          <h2 className="font-display text-3xl font-bold mt-2 mb-3">We take safety seriously.</h2>
-          <p className="text-text-muted text-base max-w-xl mx-auto">
+        <FadeIn className="text-center mb-8 sm:mb-12">
+          <span className="text-text-subtle uppercase tracking-widest text-[11px] sm:text-[13px] font-semibold">Safety & Compliance</span>
+          <h2 className="font-display text-2xl sm:text-3xl font-bold mt-2 mb-3">We take safety seriously.</h2>
+          <p className="text-text-muted text-sm sm:text-base max-w-xl mx-auto">
             Every design decision was made with patient safety first. Here is exactly how the system handles data.
           </p>
         </FadeIn>
 
-        <FadeInStagger className="grid md:grid-cols-3 gap-4 mb-4">
+        <FadeInStagger className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {pillars.map((p, i) => (
             <FadeIn key={i}>
               <TexturePanel className="p-5 h-full">

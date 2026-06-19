@@ -16,7 +16,7 @@ export default function GlowButton({ to, href, children, glowColor = '#2DD4BF', 
     setGlowX(((e.clientX - rect.left) / rect.width) * 100);
   }, []);
 
-  const sizes = { md: 'px-6 py-3 text-sm', lg: 'px-8 py-4 text-base' };
+  const sizes = { md: 'px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm', lg: 'px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base' };
   const isExternal = !!href;
 
   const btn = (

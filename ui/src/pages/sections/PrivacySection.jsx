@@ -53,13 +53,13 @@ export default function PrivacySection() {
   }, [visible]);
 
   return (
-    <section ref={ref} className="py-20 px-6 bg-bg-mid/30">
+    <section ref={ref} className="py-12 sm:py-20 px-4 sm:px-6 bg-bg-mid/30">
       <div className="max-w-3xl mx-auto">
-        <div className="mb-12">
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-text max-w-xl">
+        <div className="mb-8 sm:mb-12">
+          <h2 className="font-display text-2xl sm:text-4xl font-bold text-text max-w-xl">
             Your data, step by step
           </h2>
-          <p className="text-text-muted text-base mt-3 max-w-lg leading-relaxed">
+          <p className="text-text-muted text-sm sm:text-base mt-2 sm:mt-3 max-w-lg leading-relaxed">
             Plain English. No legalese. Here is exactly what happens with the information you submit.
           </p>
         </div>

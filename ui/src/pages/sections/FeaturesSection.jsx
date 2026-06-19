@@ -20,14 +20,14 @@ function BentoCell({ className = '', children, glow = false }) {
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="py-20 px-6">
+    <section id="features" className="py-12 sm:py-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <FadeIn className="mb-12">
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-text max-w-2xl">
+        <FadeIn className="mb-8 sm:mb-12">
+          <h2 className="font-display text-2xl sm:text-4xl font-bold text-text max-w-2xl">
             Safety by construction,{' '}
             <span className="text-teal-400">not aspiration</span>
           </h2>
-          <p className="text-text-muted text-base mt-3 max-w-xl">
+          <p className="text-text-muted text-sm sm:text-base mt-2 sm:mt-3 max-w-xl">
             Every guardrail is structural. No AI decides whether a case needs human review.
           </p>
         </FadeIn>

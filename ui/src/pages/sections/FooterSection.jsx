@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom';
 
 export default function FooterSection() {
   return (
-    <footer className="border-t border-border py-10 px-6">
+    <footer className="border-t border-border py-8 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 mb-6">
           <div className="text-center md:text-left">
-            <div className="font-display font-bold text-lg text-teal-400 mb-1">Materna</div>
-            <p className="text-text-muted text-sm">AI-Powered Obstetric Safety Review</p>
+            <div className="font-display font-bold text-base sm:text-lg text-teal-400 mb-1">Materna</div>
+            <p className="text-text-muted text-xs sm:text-sm">AI-Powered Obstetric Safety Review</p>
           </div>
-          <div className="flex gap-6 text-sm">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-6 text-xs sm:text-sm">
             <Link to="/dashboard" className="text-text-muted hover:text-text no-underline transition-colors">Dashboard</Link>
             <a href="#safety" className="text-text-muted hover:text-text no-underline transition-colors">Safety</a>
             <Link to="/about" className="text-text-muted hover:text-text no-underline transition-colors">About</Link>

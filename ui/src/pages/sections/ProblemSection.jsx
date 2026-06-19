@@ -13,15 +13,15 @@ const STATS = [
 
 export default function ProblemSection() {
   return (
-    <section className="py-20 px-6 bg-bg-mid/30">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 bg-bg-mid/30">
       <div className="max-w-6xl mx-auto">
         {/* Section header — no uppercase tracking-widest label */}
-        <FadeIn className="mb-14">
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-text leading-tight max-w-3xl">
+        <FadeIn className="mb-10 sm:mb-14">
+          <h2 className="font-display text-2xl sm:text-4xl font-bold text-text leading-tight max-w-3xl">
             Every 2 minutes, a woman dies from{' '}
             <span className="text-amber-400">preventable</span> pregnancy complications.
           </h2>
-          <p className="text-text-muted text-base mt-4 max-w-2xl leading-relaxed">
+          <p className="text-text-muted text-sm sm:text-base mt-3 sm:mt-4 max-w-2xl leading-relaxed">
             In antenatal clinics across Pakistan, handwritten records, overworked staff, and
             disconnected specialists mean critical risks — pre-eclampsia, gestational diabetes,
             anaemia, dating errors — go undetected until it is too late.
@@ -29,13 +29,13 @@ export default function ProblemSection() {
         </FadeIn>
 
         {/* Split layout */}
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-10 lg:gap-16 items-start">
           {/* LEFT — Stats */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {STATS.map((s, i) => (
               <FadeIn key={i} delay={i * 0.12}>
                 <div className="flex items-baseline gap-3 group">
-                  <div className="font-display font-extrabold text-5xl sm:text-6xl text-amber-400 tabular-nums leading-none">
+                  <div className="font-display font-extrabold text-4xl sm:text-6xl text-amber-400 tabular-nums leading-none">
                     {s.value}
                     <span className="text-2xl text-text-muted">{s.unit}</span>
                   </div>

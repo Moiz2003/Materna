@@ -81,17 +81,17 @@ const trustStats = [
 /* ================================================================== */
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 pt-28 pb-16">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4 sm:px-6 pt-24 sm:pt-28 pb-12 sm:pb-16">
       {/* ---- background layers ---- */}
       <DotGrid />
 
-      <FloatingOrb className="w-[700px] h-[700px] -top-40 -right-40 bg-teal-500/[0.07] animate-float-slower" />
-      <FloatingOrb className="w-[450px] h-[450px] top-1/4 -left-32 bg-amber-500/[0.05] animate-float-slow" />
-      <FloatingOrb className="w-[350px] h-[350px] bottom-32 right-1/4 bg-teal-400/[0.04] animate-float" />
+      <FloatingOrb className="w-[300px] h-[300px] sm:w-[700px] sm:h-[700px] -top-20 -right-20 sm:-top-40 sm:-right-40 bg-teal-500/[0.07] animate-float-slower" />
+      <FloatingOrb className="w-[200px] h-[200px] sm:w-[450px] sm:h-[450px] top-1/3 sm:top-1/4 -left-20 sm:-left-32 bg-amber-500/[0.05] animate-float-slow" />
+      <FloatingOrb className="w-[160px] h-[160px] sm:w-[350px] sm:h-[350px] bottom-24 sm:bottom-32 right-0 sm:right-1/4 bg-teal-400/[0.04] animate-float" />
 
       {/* Top light wash */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[900px] h-[300px] sm:h-[500px] pointer-events-none"
         style={{
           background:
             'radial-gradient(ellipse 50% 60% at 50% 0%, rgba(45,212,191,0.08) 0%, transparent 70%)',
@@ -135,22 +135,22 @@ export default function HeroSection() {
                 'Cryptographic proof of every decision.',
                 'Zero real patient data. Ever.',
               ]}
-              className="text-lg sm:text-xl text-text-muted max-w-xl mx-auto mb-3 leading-relaxed"
+              className="text-base sm:text-xl text-text-muted max-w-xl mx-auto mb-3 leading-relaxed"
             />
-            <p className="text-sm sm:text-base text-text-subtle max-w-lg mx-auto mb-10 leading-relaxed">
+            <p className="text-xs sm:text-base text-text-subtle max-w-lg mx-auto mb-8 sm:mb-10 leading-relaxed">
               Band-coordinated · Hash-chained audit · Synthetic data only
             </p>
           </FadeIn>
 
           {/* CTAs */}
           <FadeIn delay={0.24}>
-            <div className="flex gap-4 justify-center flex-wrap mb-14">
+            <div className="flex gap-3 sm:gap-4 justify-center flex-wrap mb-10 sm:mb-14">
               <GlowButton to="/dashboard" size="lg" glowColor="#2DD4BF">
                 Launch Dashboard <ArrowRight size={18} />
               </GlowButton>
               <a
                 href="#how-it-works"
-                className="group inline-flex items-center gap-2 px-6 py-3.5 border border-border hover:border-teal-500/30 bg-bg-card/40 hover:bg-bg-card/70 text-text-muted hover:text-teal-400 rounded-xl font-medium text-sm no-underline transition-all duration-300 backdrop-blur-sm"
+                className="group inline-flex items-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 border border-border hover:border-teal-500/30 bg-bg-card/40 hover:bg-bg-card/70 text-text-muted hover:text-teal-400 rounded-xl font-medium text-xs sm:text-sm no-underline transition-all duration-300 backdrop-blur-sm"
               >
                 See How It Works
                 <ChevronDown
@@ -169,7 +169,7 @@ export default function HeroSection() {
       </div>
 
       {/* ---- trust bar ---- */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto mt-10">
+      <div className="relative z-10 w-full max-w-5xl mx-auto mt-8 sm:mt-10 px-2 sm:px-0">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -177,19 +177,19 @@ export default function HeroSection() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.6 }}
           className="rounded-2xl border border-border/40 bg-bg-card/20 backdrop-blur-2xl shadow-2xl shadow-black/30"
         >
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border/30">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-border/30 divide-y md:divide-y-0 divide-border/30">
             {trustStats.map((s, i) => (
               <div
                 key={i}
-                className="px-5 py-5 text-center group hover:bg-bg-card/30 transition-colors duration-300 first:rounded-l-2xl last:rounded-r-2xl"
+                className="px-4 sm:px-5 py-4 sm:py-5 text-center group hover:bg-bg-card/30 transition-colors duration-300 first:rounded-tl-2xl md:first:rounded-l-2xl last:rounded-br-2xl md:last:rounded-r-2xl [&:nth-child(2)]:rounded-tr-2xl md:[&:nth-child(2)]:rounded-none [&:nth-child(3)]:rounded-bl-2xl md:[&:nth-child(3)]:rounded-none"
               >
-                <div className="w-9 h-9 rounded-lg bg-teal-500/10 flex items-center justify-center mx-auto mb-2.5 group-hover:bg-teal-500/20 transition-colors duration-300">
-                  <s.icon size={16} className="text-teal-400" />
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-teal-500/10 flex items-center justify-center mx-auto mb-2 sm:mb-2.5 group-hover:bg-teal-500/20 transition-colors duration-300">
+                  <s.icon size={15} className="text-teal-400" />
                 </div>
-                <div className="text-teal-400 font-display font-bold text-2xl tabular-nums tracking-tight">
+                <div className="text-teal-400 font-display font-bold text-xl sm:text-2xl tabular-nums tracking-tight">
                   {s.numeric ? <AnimatedCounter value={s.value} /> : s.value}
                 </div>
-                <div className="text-text-muted text-[12px] mt-0.5 font-medium">{s.label}</div>
+                <div className="text-text-muted text-[11px] sm:text-[12px] mt-0.5 font-medium">{s.label}</div>
               </div>
             ))}
           </div>

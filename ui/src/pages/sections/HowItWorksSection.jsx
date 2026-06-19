@@ -122,12 +122,12 @@ const agents = [
 
 export default function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="py-20 px-6">
+    <section id="how-it-works" className="py-12 sm:py-20 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto">
-        <FadeIn className="text-center mb-10">
-          <span className="text-text-subtle uppercase tracking-widest text-[13px] font-semibold">How It Works</span>
-          <h2 className="font-display text-3xl font-bold mt-2 mb-3">Five specialist agents. One shared Band room.</h2>
-          <p className="text-text-muted text-base max-w-xl mx-auto">
+        <FadeIn className="text-center mb-8 sm:mb-10">
+          <span className="text-text-subtle uppercase tracking-widest text-[11px] sm:text-[13px] font-semibold">How It Works</span>
+          <h2 className="font-display text-2xl sm:text-3xl font-bold mt-2 mb-3">Five specialist agents. One shared Band room.</h2>
+          <p className="text-text-muted text-sm sm:text-base max-w-xl mx-auto">
             No agent calls another directly. Every handoff traverses the Band room —
             visible, auditable, and cryptographically sealed.
           </p>
