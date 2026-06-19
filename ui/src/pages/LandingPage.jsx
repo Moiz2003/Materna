@@ -2,11 +2,15 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import HeroSection from './sections/HeroSection';
 import ProblemSection from './sections/ProblemSection';
+import ImpactDashboard from './sections/ImpactDashboard';
 import PipelineFlow from '../components/effects/PipelineFlow';
 import HowItWorksSection from './sections/HowItWorksSection';
+import AgentPerformance from './sections/AgentPerformance';
 import FeaturesSection from './sections/FeaturesSection';
+import ClinicalEvidence from './sections/ClinicalEvidence';
 import SafetySection from './sections/SafetySection';
 import PrivacySection from './sections/PrivacySection';
+import ScalabilityPotential from './sections/ScalabilityPotential';
 import CTASection from './sections/CTASection';
 import FooterSection from './sections/FooterSection';
 
@@ -59,11 +63,15 @@ export default function LandingPage() {
 
       <HeroSection />
       <ProblemSection />
+      <ImpactDashboard />
       <PipelineFlow />
       <HowItWorksSection />
+      <AgentPerformance />
       <div id="features"><FeaturesSection /></div>
+      <ClinicalEvidence />
       <div id="safety"><SafetySection /></div>
       <PrivacySection />
+      <ScalabilityPotential />
       <CTASection />
       <FooterSection />
     </div>
