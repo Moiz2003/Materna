@@ -4,11 +4,13 @@
  * Calls the FastAPI routes defined in §8 of the SDD.
  * No localStorage/sessionStorage (Playbook P13 constraint).
  *
- * API base: reads VITE_API_URL env var (set in .env or docker-compose),
- * falls back to localhost:8000 for dev.
+ * API base priority:
+ *   1. VITE_API_URL env var (for Vercel deployments)
+ *   2. Relative path "" (for same-origin nginx / Vite proxy)
+ *   3. localhost:8000 (dev fallback)
  */
 
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const BASE = import.meta.env.VITE_API_URL || "";
 
 // GET /health — backend connectivity probe (read-only; used by the sidebar)
 export async function getHealth() {
