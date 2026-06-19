@@ -24,8 +24,13 @@ def _ensure_dir() -> None:
     AUDIT_LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 
+import re as _re
+
+def _sanitize_id(raw: str) -> str:
+    return _re.sub(r'[^A-Za-z0-9\-]', '', raw)[:64]
+
 def _log_path(case_id: str) -> Path:
-    return AUDIT_LOG_DIR / f"{case_id}.jsonl"
+    return AUDIT_LOG_DIR / f"{_sanitize_id(case_id)}.jsonl"
 
 
 def _hash_payload(payload: dict) -> str:

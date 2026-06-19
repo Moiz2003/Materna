@@ -45,6 +45,7 @@ class CaseStatus:
     STRUCTURED = "STRUCTURED"
     ANALYZED = "ANALYZED"
     CHECKED = "CHECKED"
+    AUDITED = "AUDITED"
     AUTO_CLEARED = "AUTO_CLEARED"
     ESCALATED = "ESCALATED"
     HUMAN_REVIEWED = "HUMAN_REVIEWED"
@@ -58,8 +59,15 @@ _case_store: dict[str, dict] = {}
 _STATE_DIR = Path(__file__).parent.parent / "data" / "state"
 
 
+import re as _re
+
+def _sanitize_id(raw: str) -> str:
+    """Strip path traversal and limit length."""
+    return _re.sub(r'[^A-Za-z0-9\-]', '', raw)[:64]
+
 def _load_case_json(case_id: str) -> dict | None:
     """Load a synthetic case from data/cases/<case_id>.json."""
+    case_id = _sanitize_id(case_id)
     case_path = Path(__file__).parent.parent / "data" / "cases" / f"{case_id}.json"
     if case_path.exists():
         with open(case_path) as f:
@@ -71,7 +79,7 @@ def _persist_state(state: dict) -> None:
     """Write the case state to disk so it survives a server reload/restart."""
     try:
         _STATE_DIR.mkdir(parents=True, exist_ok=True)
-        case_id = state.get("case_id", "unknown")
+        case_id = _sanitize_id(state.get("case_id", "unknown"))
         (_STATE_DIR / f"{case_id}.json").write_text(
             json.dumps(state, default=str, indent=2)
         )
@@ -81,6 +89,7 @@ def _persist_state(state: dict) -> None:
 
 def _load_state(case_id: str) -> dict | None:
     """Load a previously persisted case state from disk."""
+    case_id = _sanitize_id(case_id)
     path = _STATE_DIR / f"{case_id}.json"
     if path.exists():
         try:

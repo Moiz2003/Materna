@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, field_validator
 # ---------------------------------------------------------------------------
 
 class Demographics(BaseModel):
-    age: int = Field(ge=0, le=120)
+    age: int = Field(default=0, ge=0, le=120)
     parity: str = ""
 
 
@@ -152,7 +152,7 @@ class HumanDecision(BaseModel):
     reviewer: str = ""
     verdict: Literal["approve", "override"] = "approve"
     note: str = ""
-    decided_at: datetime = Field(default_factory=datetime.utcnow)
+    decided_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # ---------------------------------------------------------------------------

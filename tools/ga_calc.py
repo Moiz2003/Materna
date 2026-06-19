@@ -35,8 +35,14 @@ def ga_from_ultrasound(meas_type: str, value_mm: float) -> float:
         return round((2.0 * value_mm + 44.2) / 7.0, 1)
     elif meas_type == "CRL":
         return round((value_mm + 42.0) / 7.0, 1)
+    elif meas_type == "FL":
+        return round((value_mm * 0.21 + 6.4), 1)
+    elif meas_type == "HC":
+        return round((value_mm * 0.33 + 7.2), 1)
+    elif meas_type == "AC":
+        return round((value_mm * 0.18 + 8.8), 1)
     else:
-        raise ValueError(f"Unsupported measurement type: {meas_type}. Supported: BPD, CRL")
+        raise ValueError(f"Unsupported measurement type: {meas_type}. Supported: BPD, CRL, FL, HC, AC")
 
 
 def discordance_weeks(ga_lmp: float, ga_usg: float) -> float:

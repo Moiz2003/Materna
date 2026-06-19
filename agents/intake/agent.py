@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 AIML_API_KEY = os.getenv("AIML_API_KEY", "")
 AIML_BASE_URL = os.getenv("AIML_BASE_URL", "https://api.aimlapi.com/v1")
-INTAKE_MODEL = os.getenv("AIML_INTAKE_MODEL", "gpt-4o")
+INTAKE_MODEL = os.getenv("AIML_INTAKE_MODEL", "openai/gpt-4o-mini")
 
 # ---------------------------------------------------------------------------
 # System prompt — P8 Playbook: extract, never invent
@@ -271,7 +271,7 @@ def _validate_and_build(normalised: dict) -> tuple[StructuredCase | None, dict |
                 "errors": str(e),
                 "message": "Schema validation failed.",
             },
-            "produced_at": datetime.utcnow().isoformat(),
+            "produced_at": datetime.now(timezone.utc).isoformat(),
         }
 
 
@@ -336,7 +336,10 @@ async def run_intake(client: BandClient, room: Room) -> None:
             from_agent="intake",
             intent="handoff",
             to_role="dating_risk",
-            payload={"message": "StructuredCase ready for analysis."},
+            payload={
+                "message": "StructuredCase ready for analysis.",
+                "structured_case": structured.model_dump(mode="json"),
+            },
         )
         logger.info(f"[intake] Handing off to dating_risk")
         await client.post(room, handoff_env.model_dump(mode="json"))

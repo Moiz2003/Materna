@@ -187,8 +187,11 @@ async def extract_from_image(image: UploadFile = File(...)):
     if not gemini_key and not openrouter_key:
         raise HTTPException(status_code=503, detail="No AI API key configured")
 
-    # Read and encode image
+    # Read and encode image (cap at 10MB)
+    MAX_SIZE = 10 * 1024 * 1024
     img_bytes = await image.read()
+    if len(img_bytes) > MAX_SIZE:
+        raise HTTPException(status_code=413, detail=f"Image too large. Max {MAX_SIZE // (1024*1024)}MB.")
     img_b64 = _b64.b64encode(img_bytes).decode("utf-8")
 
     # Detect MIME type
@@ -422,10 +425,15 @@ async def submit_case(
     case_data["case_id"] = case_id
 
     # Save uploaded image if provided
+    import re as _re
+    safe_id = _re.sub(r'[^A-Za-z0-9\-]', '', case_id)[:64]
+    case_data["case_id"] = safe_id
+    case_id = safe_id
+
     if usg_image and usg_image.filename:
         usg_dir = Path(__file__).parent.parent / "data" / "usg"
         usg_dir.mkdir(parents=True, exist_ok=True)
-        image_path = usg_dir / f"{case_id}.png"
+        image_path = usg_dir / f"{safe_id}.png"
         content = await usg_image.read()
         image_path.write_bytes(content)
         case_data["usg_image_ref"] = str(image_path.relative_to(

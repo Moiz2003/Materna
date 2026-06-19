@@ -10,6 +10,13 @@
 
 const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
+// GET /health — backend connectivity probe (read-only; used by the sidebar)
+export async function getHealth() {
+  const res = await fetch(`${BASE}/health`, { method: "GET" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 async function request(method, path, body = null) {
   const opts = {
     method,
@@ -70,6 +77,16 @@ export async function extractCase(clinicalText) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text: clinicalText }),
   });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+// POST /demo/tamper/{caseId} — tamper audit chain for demo
+export async function demoTamper(caseId) {
+  const res = await fetch(`${BASE}/demo/tamper/${caseId}`, { method: 'POST' });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     throw new Error(err.detail || `HTTP ${res.status}`);

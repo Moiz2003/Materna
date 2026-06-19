@@ -1,0 +1,9 @@
+{
+  "case_id": "C-0004",
+  "demographics": { "age": 22, "parity": "G2P1" },
+  "lmp_date": "2026-06-01",
+  "usg_date": "2026-06-10",
+  "usg_measurement": { "type": "CRL", "value_mm": 5 },
+  "vitals": { "bp_systolic": 165, "bp_diastolic": 105 },
+  "labs": { "urine_protein": "3+", "fasting_glucose_mg_dl": 88, "hb_g_dl": 9.2 }
+}

@@ -35,27 +35,9 @@ services:
       orchestrator:
         condition: service_healthy
 
-  agent-dating-risk:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: arb-agent-dating-risk
-    env_file:
-      - .env
-    depends_on:
-      orchestrator:
-        condition: service_healthy
-
-  agent-guideline:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: arb-agent-guideline
-    env_file:
-      - .env
-    depends_on:
-      orchestrator:
-        condition: service_healthy
+  # NOTE: agent-dating-risk and agent-guideline are not wired for distributed
+  # Band mode yet. Agents currently run in-process via handle_case_local().
+  # Uncomment and add CMD overrides when implementing distributed agent deployment.
 
   ui:
     build:

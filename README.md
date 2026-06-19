@@ -1,31 +1,35 @@
-# Antenatal Review Board
+# Materna — Antenatal Review Board
 
-**A Band-coordinated multi-agent obstetric safety check with a real obstetrician as the human-in-the-loop gate.**
+**A Band-coordinated multi-agent obstetric safety system with a real gynecologist as the human-in-the-loop gate.**
 
-Built for the [Band of Agents Hackathon](https://lablab.ai) (Track 3: Regulated & High-Stakes Workflows) by Abdul Moiz Ahmed. Three AI agents collaborate through **Band** — then escalate flagged cases to a human OB who holds final authority. Every step is written to a **SHA-256 hash-chained audit log** and emitted as a **tamper-evident sealed PDF**.
+Built for the [Band of Agents Hackathon](https://lablab.ai) (Track 3: Regulated & High-Stakes Workflows) by Abdul Moiz Ahmed. Four AI agents collaborate through **Band** — then escalate flagged cases to a human OB who holds final authority. Every step is written to a **SHA-256 hash-chained audit log** and emitted as a **tamper-evident sealed PDF**.
 
 ---
 
 ## Architecture
 
 ```
-┌──────────────┐     ┌──────────────────┐     ┌─────────────────────────┐
-│  React/Vite   │────▶│  Orchestrator    │────▶│     Band Room            │
-│  (Submit UI)  │     │  (FastAPI)       │     │  (shared context)        │
-└──────────────┘     └──────────────────┘     │                         │
-                                              │  ┌───────────────────┐  │
-                                              │  │ Intake Agent      │  │
-                                              │  │ (normalise+val)   │──┼──▶ StructuredCase
-                                              │  └───────────────────┘  │
-                                              │  ┌───────────────────┐  │
-                                              │  │ Dating & Risk     │  │
-                                              │  │ Agent (GA+flags)  │──┼──▶ Finding + RiskFlags
-                                              │  └───────────────────┘  │
-                                              │  ┌───────────────────┐  │
-                                              │  │ Guideline Agent   │  │
-                                              │  │ (compliance+veto) │──┼──▶ ComplianceResult
-                                              │  └───────────────────┘  │
-                                              └─────────────────────────┘
+┌──────────────┐     ┌──────────────────┐     ┌──────────────────────────────┐
+│  React/Vite   │────▶│  Orchestrator    │────▶│         Band Room             │
+│  (Submit UI)  │     │  (FastAPI)       │     │      (shared context)         │
+└──────────────┘     └──────────────────┘     │                              │
+                                              │  ┌────────────────────────┐  │
+                                              │  │ Intake Agent           │  │
+                                              │  │ (normalise + validate) │──┼──▶ StructuredCase
+                                              │  └────────────────────────┘  │
+                                              │  ┌────────────────────────┐  │
+                                              │  │ Dating & Risk Agent    │  │
+                                              │  │ (GA calc + risk flags) │──┼──▶ Finding + RiskFlags
+                                              │  └────────────────────────┘  │
+                                              │  ┌────────────────────────┐  │
+                                              │  │ Guideline Agent        │  │
+                                              │  │ (compliance + veto)    │──┼──▶ ComplianceResult
+                                              │  └────────────────────────┘  │
+                                              │  ┌────────────────────────┐  │
+                                              │  │ Auditor Agent 🕵️       │  │
+                                              │  │ (adversarial review)   │──┼──▶ AuditorChallenge
+                                              │  └────────────────────────┘  │
+                                              └──────────────────────────────┘
                                                    │ flag or veto?
                                                    ▼
                          ┌──────────────────────────────────────────────┐
@@ -42,23 +46,32 @@ Built for the [Band of Agents Hackathon](https://lablab.ai) (Track 3: Regulated 
 
 | Judging Pillar                | How This Submission Satisfies It                                                                                                                                                      |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Application of Technology** | 3 agents with distinct roles, real **Band handoffs** (rooms, Agent API, shared context), **Human API** gate. No agent calls another directly — every handoff traverses the Band room. |
-| **Presentation**              | Live Band room view in the UI showing agent handoffs in real time. On-camera OB override is the demo's centrepiece.                                                                   |
-| **Business Value**            | Reduces manual antenatal coordination; catches dating errors and risk signals; produces an auditable, signed decision record.                                                         |
-| **Originality**               | Obstetric domain is unclaimed on the hackathon board. Real specialist as the human gate. Ties to original GA-discordance research.                                                    |
+| **Application of Technology** | 4 agents with distinct roles, real **Band handoffs** (rooms, Agent API, shared context), **Human API** gate. No agent calls another directly — every handoff traverses the Band room. |
+| **Presentation**              | Premium glass-morphism UI. Live Band room view. Animated pipeline visualization. Novice/Expert modes. Demo play cards. Onboarding tour.                                               |
+| **Business Value**            | Addresses real maternal mortality crisis (186/100k in Pakistan). Reduces manual antenatal coordination; catches dating errors and risk signals; produces an auditable, signed record. |
+| **Originality**               | Obstetric domain is unclaimed. Real specialist as human gate. Novel **Auditor agent** adversarially challenges the Guideline. Ties to original GA-discordance research.               |
 
 ### The Winning Pattern
 
-> Specialised agents → veto/escalation → human-in-the-loop gate → immutable audit trail → decision packet. This project keeps that proven pattern but applies it to obstetrics, with a real practicing gynaecologist as the on-camera human gate.
+> Specialised agents → adversarial review → veto/escalation → human-in-the-loop gate → immutable audit trail → tamper-evident PDF. This project applies that proven safety pattern to obstetrics, with a real practicing gynecologist as the on-camera human gate.
 
 ## How Band Is Used (The Judged Core)
 
 1. **Rooms** — One Band room per case, created by the orchestrator and seeded with the raw case payload as shared context.
-2. **Agent API (recruitment)** — The orchestrator recruits `intake`, `dating_risk`, and `guideline` into the room via Band's Agent API. Agents are discoverable and modular — not hardwired into a pipeline.
-3. **Handoffs through shared context** — Intake posts `StructuredCase` → hands off to dating_risk via the room. Dating & Risk posts `Finding` + `RiskFlag`s → hands off to guideline. Guideline posts `ComplianceResult`. Every message is a typed envelope posted to and read from the Band room. **No agent imports or calls another agent's functions directly.**
-4. **Human API (gate)** — When a risk flag fires or the guideline agent issues a veto, the orchestrator uses Band's Human API to escalate an escalation brief to the OB reviewer and blocks until a decision returns.
+2. **Agent API (recruitment)** — The orchestrator recruits `intake`, `dating_risk`, `guideline`, and `auditor` into the room via Band's Agent API. Agents are discoverable and modular.
+3. **Handoffs through shared context** — Every message is a typed envelope posted to and read from the Band room. **No agent imports or calls another agent's functions directly.**
+4. **Human API (gate)** — When a risk flag fires or veto triggers, the orchestrator uses Band's Human API to escalate an escalation brief to the OB reviewer.
 
 **Anti-pattern avoided:** The chain is NOT `agentB(agentA(x))` with Band bolted on as a logger. The handoff itself traverses Band.
+
+## Demo Cases
+
+| Case       | Scenario                                         | GA Discordance | Flags                                                 | Outcome                                     |
+| ---------- | ------------------------------------------------ | -------------- | ----------------------------------------------------- | ------------------------------------------- |
+| **C-0001** | 29y G3P2, elevated BP, proteinuria, high glucose | **4.3 wk** ⚠   | PE-001 (high), GDM-002 (moderate), ANE-003 (moderate) | **ESCALATED → approve → SEALED**            |
+| **C-0002** | 25y G1P0, normal vitals, normal labs             | < 2.0 wk       | None                                                  | **AUTO_CLEARED → SEALED**                   |
+| **C-0003** | 34y G5P4, borderline BP, glucose 95, Hb 10.5     | Calculated     | PE-001 (high), GDM-002 (moderate), ANE-003 (moderate) | **ESCALATED — triple flag**                 |
+| **C-0004** | 22y G2P1, severe BP 165/105, protein 3+, Hb 9.2  | **Massive** ⚠  | PE-001 (high), ANE-003 (moderate) + auditor challenge | **ESCALATED — auditor challenge fireworks** |
 
 ## Quick Start
 
@@ -82,36 +95,11 @@ cp .env.example .env
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# 4. Run full demo (both C-0001 + C-0002)
-python -m orchestrator.main
-# Then: curl -X POST http://localhost:8000/demo/run-all
+# 4. Run the API server
+python -m uvicorn orchestrator.main:app --host 0.0.0.0 --port 8000
 
-# Or: run a single case
-python -c "
-import asyncio
-from orchestrator.lifecycle import handle_case_local
-result = asyncio.run(handle_case_local('C-0001'))
-print('Status:', result['status'])
-print('Flags:', len(result.get('flags',[])))
-print('Audit verified:', result.get('audit_verified'))
-"
-```
-
-### With Real Band (P0 spike)
-
-```bash
-# Set your Band key in .env
-echo 'BAND_API_KEY=your_key_here' >> .env
-python spike.py
-```
-
-### Full System (Docker)
-
-```bash
-docker compose up
-# Backend: http://localhost:8000
-# Health:   http://localhost:8000/health
-# API docs: http://localhost:8000/docs
+# 5. Run all 4 demo cases
+curl -X POST http://localhost:8000/demo/run-all
 ```
 
 ### UI (React/Vite)
@@ -121,21 +109,14 @@ cd ui && npm install && npm run dev
 # Open http://localhost:5173
 ```
 
-### Run Hardening Tests
+### Run Tests
 
 ```bash
-pytest tests/test_hardening.py -v
-# 28 adversarial tests: gate bypass, prompt injection, determinism, audit integrity, failure paths, secret hygiene
+pytest tests/ -v
+# 132 tests across 10 test files: hardening, rules, GA calc, contracts, guideline, security, API, coordination, lifecycle
 ```
 
-## Demo Cases
-
-| Case       | Description                                      | GA (LMP/USG)      | Discordance  | Flags                             | Outcome                           |
-| ---------- | ------------------------------------------------ | ----------------- | ------------ | --------------------------------- | --------------------------------- |
-| **C-0001** | 29y G3P2, elevated BP, proteinuria, high glucose | 27.3 wk / 23.0 wk | **4.3 wk** ⚠ | PE-001 (high), GDM-002 (moderate) | **ESCALATED → override → SEALED** |
-| **C-0002** | 25y G1P0, normal vitals, normal labs             | ~16 wk / ~16 wk   | < 2.0 wk     | None                              | **AUTO_CLEARED → SEALED**         |
-
-## API Routes (§8 SDD)
+## API Routes
 
 | Method | Path                   | Purpose                                            |
 | ------ | ---------------------- | -------------------------------------------------- |
@@ -145,40 +126,46 @@ pytest tests/test_hardening.py -v
 | `POST` | `/cases/{id}/decision` | Record human verdict (`approve`/`override` + note) |
 | `GET`  | `/cases/{id}/packet`   | Download sealed PDF review packet                  |
 | `GET`  | `/cases/{id}/audit`    | Audit chain + SHA-256 verification status          |
-| `POST` | `/demo/run-all`        | Run both demo cases and return results             |
+| `POST` | `/demo/tamper/{id}`    | Tamper audit chain (demo)                          |
+| `POST` | `/demo/run-all`        | Run all 4 demo cases and return results            |
 
 ## File Structure
 
 ```
 antenatal-review-board/
 ├── orchestrator/           # FastAPI app + lifecycle state machine + deterministic gate
-│   ├── main.py             #   6 REST routes + health + demo runner
+│   ├── main.py             #   8 REST routes + health + demo runner
 │   ├── lifecycle.py        #   Full state machine (Band mode + local mode)
-│   ├── gate.py             #   must_escalate() — pure function, NEVER an LLM
+│   ├── gate.py             #   must_escalate() — 13-line pure function, NEVER an LLM
 │   └── recruit.py          #   Band room + agent recruitment
-├── agents/                 # Three specialist agents (communicate ONLY via Band)
+├── agents/                 # Four specialist agents (communicate ONLY via Band)
 │   ├── intake/agent.py     #   Normalise + validate → StructuredCase
 │   ├── dating_risk/agent.py#   GA calc + discordance + imaging + risk flags
-│   └── guideline/agent.py  #   Ruleset check → ComplianceResult + veto
-├── band/client.py          # Band coordination wrapper (open_room, recruit, post, etc.)
+│   ├── guideline/agent.py  #   Ruleset check → ComplianceResult + veto
+│   └── auditor/agent.py    #   🕵️ Adversarial reviewer — challenges Guideline
+├── band_wrapper/client.py  # Band coordination wrapper (open_room, recruit, post)
 ├── tools/                  # Deterministic tools + LLM tools
 │   ├── ga_calc.py          #   GA math (LMP & ultrasound) — pure functions
 │   ├── guideline_kb.py     #   Rule loader + deterministic checker + veto logic
-│   └── imaging.py          #   AI/ML API vision — decision-support, never diagnostic
+│   ├── imaging.py          #   AI/ML API vision — decision-support, never diagnostic
+│   └── treatment.py        #   Treatment plan generation
 ├── risk/rules.py           # Deterministic risk evaluators (PE, GDM, anaemia)
 ├── audit/chain.py          # SHA-256 hash-chained JSONL audit log + verification
 ├── packet/generator.py     # ReportLab sealed PDF review packet
-├── schemas.py              # Pydantic v2 models — single source of truth (10 schemas)
+├── schemas.py              # Pydantic v2 models — single source of truth
 ├── data/
-│   ├── cases/C-0001.json   #   Synthetic case (flagged)
+│   ├── cases/C-0001.json   #   Synthetic case (flagged: PE + GDM)
 │   ├── cases/C-0002.json   #   Synthetic case (clean)
+│   ├── cases/C-0003.json   #   Synthetic case (borderline triple-flag)
+│   ├── cases/C-0004.json   #   Synthetic case (severe, auditor challenge)
 │   └── rules/antenatal_rules.yaml  # Declarative guideline ruleset
 ├── ui/src/
-│   ├── App.jsx             #   5-panel React control surface
+│   ├── pages/              #   Landing, Dashboard, About pages
+│   ├── components/         #   Glass panels, stage cards, effects, output
 │   └── api.js              #   REST client for orchestrator
-├── tests/test_hardening.py #   28 adversarial tests (gate bypass, injection, etc.)
-├── spike.py                #   P0 Band spike (3-agent message flow)
-├── docker-compose.yml      #   5 services: orchestrator + 3 agents + UI
+├── tests/                  # 132 tests across 10 files
+├── spike.py                #   P0 Band spike (multi-agent message flow)
+├── docker-compose.yml      #   Orchestrator + UI services
 └── Dockerfile              #   Python 3.11-slim
 ```
 
@@ -195,28 +182,28 @@ antenatal-review-board/
 
 ## The 8 Golden Rules (Applied Throughout)
 
-1. **Band is the coordination layer** — agents communicate ONLY via Band room
+1. **Band is the coordination layer** — agents communicate ONLY via Band rooms
 2. **The escalation gate is deterministic** — `must_escalate()` is a pure function
 3. **Synthetic data only** — no real PHI
 4. **Decision-support framing** — human holds final authority
 5. **Math & rules are code, not vibes** — GA, risk, guideline are deterministic functions
 6. **Everything is audited** — SHA-256 hash chain on every state transition
-7. **Tests gate progress** — 28 adversarial hardening tests
+7. **Tests gate progress** — 132 tests across 10 files, including adversarial hardening
 8. **Secrets in .env only** — never hardcoded, never committed
 
 ## Tech Stack
 
-| Layer                 | Choice                                             | Rationale                                           |
-| --------------------- | -------------------------------------------------- | --------------------------------------------------- |
-| Coordination          | **Band** (SDK / Agent API / Human API / WebSocket) | Required; the judged collaboration layer            |
-| Model Inference       | **AI/ML API**                                      | Unified model access; partner-prize eligibility     |
-| Orchestrator / Agents | **Python 3.11 + FastAPI**                          | Async-friendly; author's existing skill             |
-| Schemas               | **Pydantic v2**                                    | Single source of truth; validated at every boundary |
-| Imaging               | **Multimodal LLM** via AI/ML API                   | Decision-support; no training needed                |
-| Packet                | **ReportLab**                                      | Reliable PDF output                                 |
-| Audit                 | **hashlib (SHA-256) + JSONL**                      | Tamper-evidence; no blockchain needed               |
-| UI                    | **React + Vite**                                   | Minimal; just enough to drive the demo              |
-| Packaging             | **Docker Compose**                                 | Single host; clean local/EC2 deploy                 |
+| Layer                 | Choice                                 | Rationale                                           |
+| --------------------- | -------------------------------------- | --------------------------------------------------- |
+| Coordination          | **Band** (SDK / Agent API / Human API) | Required; the judged collaboration layer            |
+| Model Inference       | **AI/ML API** via OpenRouter           | Unified model access; partner-prize eligibility     |
+| Orchestrator / Agents | **Python 3.11 + FastAPI**              | Async-friendly                                      |
+| Schemas               | **Pydantic v2**                        | Single source of truth; validated at every boundary |
+| Imaging               | **Gemini Vision** via AI/ML API        | Decision-support; no training needed                |
+| Packet                | **ReportLab**                          | Professional clinical PDF output                    |
+| Audit                 | **hashlib (SHA-256) + JSONL**          | Tamper-evidence; no blockchain needed               |
+| UI                    | **React + Vite + Tailwind CSS**        | Premium glass-morphism design system                |
+| Packaging             | **Docker Compose**                     | Single host; clean deploy                           |
 
 ## License
 
