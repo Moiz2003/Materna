@@ -6,13 +6,13 @@ Materna runs every antenatal case through four specialist AI agents that collabo
 
 Built for the Band of Agents Hackathon (Track 3 — Regulated & High-Stakes Workflows).
 
-| | |
-| --- | --- |
-| **Domain** | Antenatal (obstetric) care coordination and triage |
-| **Coordination layer** | Band (Agent API + Human API + Rooms) |
-| **Safety model** | Deterministic escalation gate + immutable audit chain + mandatory human gate |
-| **Data** | Synthetic / anonymised only — no real PHI |
-| **Status** | Hackathon build; live reference deployment on AWS + Vercel |
+|                        |                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| **Domain**             | Antenatal (obstetric) care coordination and triage                           |
+| **Coordination layer** | Band (Agent API + Human API + Rooms)                                         |
+| **Safety model**       | Deterministic escalation gate + immutable audit chain + mandatory human gate |
+| **Data**               | Synthetic / anonymised only — no real PHI                                    |
+| **Status**             | Hackathon build; live reference deployment on AWS + Vercel                   |
 
 ---
 
@@ -70,12 +70,12 @@ The key property: **the decision to involve a human is structural, not probabili
 
 ## 3. Why It Is Valuable
 
-| Stakeholder | Value delivered |
-| --- | --- |
-| **Clinician** | Removes the per-case reconciliation toil (GA math, lab thresholds, missing-test checks). Surfaces only the cases that genuinely need judgement, with the evidence pre-assembled. |
-| **Patient** | Raises the floor on detection. A tired clinician can miss a 4-week dating discordance; a pure function cannot. |
-| **Clinic / system owner** | Produces a tamper-evident, signed record for every case — defensible under audit, and a foundation for quality metrics. |
-| **Regulator** | The escalation decision is inspectable code, the audit chain is verifiable, and the human always holds final authority. There is no autonomous diagnostic claim to certify. |
+| Stakeholder               | Value delivered                                                                                                                                                                  |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Clinician**             | Removes the per-case reconciliation toil (GA math, lab thresholds, missing-test checks). Surfaces only the cases that genuinely need judgement, with the evidence pre-assembled. |
+| **Patient**               | Raises the floor on detection. A tired clinician can miss a 4-week dating discordance; a pure function cannot.                                                                   |
+| **Clinic / system owner** | Produces a tamper-evident, signed record for every case — defensible under audit, and a foundation for quality metrics.                                                          |
+| **Regulator**             | The escalation decision is inspectable code, the audit chain is verifiable, and the human always holds final authority. There is no autonomous diagnostic claim to certify.      |
 
 What makes this credible rather than aspirational:
 
@@ -87,7 +87,7 @@ What makes this credible rather than aspirational:
 
 These eight rules are enforced throughout the codebase, several of them by tests that fail CI on violation.
 
-1. **Band is the coordination layer.** Agents communicate through Band rooms via typed message envelopes. No agent imports or calls another agent's functions directly.
+1. **Band carries every inter-agent envelope as a shared context log.** The orchestrator drives agents directly (local-mode fallback preserves safety), mirroring every handoff — StructuredCase, Finding, ComplianceResult, AuditorChallenge — into the Band room as typed envelopes. When Band is available, the room is visible and auditable. When Band is unavailable, the pipeline runs with identical safety behaviour. Band adds visibility, coordination surface, and the Human API gate; safety does not depend on it.
 2. **The escalation gate is deterministic.** `must_escalate()` is a pure function. An LLM never decides whether to escalate.
 3. **Synthetic data only.** No real PHI ever enters the system.
 4. **Decision-support framing.** The human OB holds final authority on every flagged case; imaging output is labelled decision-support, never diagnosis.
@@ -162,32 +162,32 @@ flowchart TB
 
 ### Component responsibilities
 
-| Component | Path | Responsibility |
-| --- | --- | --- |
-| Orchestrator / state machine | `orchestrator/lifecycle.py` | Drives a case through every state; owns Band session and audit writes |
-| Escalation gate | `orchestrator/gate.py` | Pure function deciding escalate vs. auto-clear |
-| API surface | `orchestrator/main.py` | FastAPI routes (cases, decisions, packet, audit, demo, extract) |
-| Recruitment | `orchestrator/recruit.py` | Opens the Band room and recruits agents |
-| Agents | `agents/*/agent.py` | Four specialists, each with a Band-mode and a local-mode entrypoint |
-| Band wrapper | `band_wrapper/client.py` | `open_room`, `recruit`, `post`; `band_available()` graceful degradation |
-| Deterministic tools | `tools/ga_calc.py`, `risk/rules.py`, `tools/guideline_kb.py` | GA math, risk evaluators, rule loading/checking |
-| LLM tools | `tools/imaging.py`, `tools/treatment.py` | Vision decision-support, treatment-plan drafting |
-| Audit chain | `audit/chain.py` | Append-only SHA-256 hash chain + verification |
-| Packet | `packet/generator.py` | Sealed clinical PDF |
-| Schemas | `schemas.py` | Pydantic v2 models — single source of truth |
+| Component                    | Path                                                         | Responsibility                                                          |
+| ---------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Orchestrator / state machine | `orchestrator/lifecycle.py`                                  | Drives a case through every state; owns Band session and audit writes   |
+| Escalation gate              | `orchestrator/gate.py`                                       | Pure function deciding escalate vs. auto-clear                          |
+| API surface                  | `orchestrator/main.py`                                       | FastAPI routes (cases, decisions, packet, audit, demo, extract)         |
+| Recruitment                  | `orchestrator/recruit.py`                                    | Opens the Band room and recruits agents                                 |
+| Agents                       | `agents/*/agent.py`                                          | Four specialists, each with a Band-mode and a local-mode entrypoint     |
+| Band wrapper                 | `band_wrapper/client.py`                                     | `open_room`, `recruit`, `post`; `band_available()` graceful degradation |
+| Deterministic tools          | `tools/ga_calc.py`, `risk/rules.py`, `tools/guideline_kb.py` | GA math, risk evaluators, rule loading/checking                         |
+| LLM tools                    | `tools/imaging.py`, `tools/treatment.py`                     | Vision decision-support, treatment-plan drafting                        |
+| Audit chain                  | `audit/chain.py`                                             | Append-only SHA-256 hash chain + verification                           |
+| Packet                       | `packet/generator.py`                                        | Sealed clinical PDF                                                     |
+| Schemas                      | `schemas.py`                                                 | Pydantic v2 models — single source of truth                             |
 
 ## 6. The Four Agents
 
-Each agent is isolated: it has a Band-mode entrypoint (`run_*`) that does all I/O through the room, and a local-mode entrypoint (`run_*_local`) that the orchestrator calls directly when Band is unavailable. The safety properties are identical in both modes.
+Each agent has a local-mode entrypoint used by the orchestrator for deterministic execution (identical safety regardless of Band availability), and a Band-mode entrypoint for when agents connect as independent room participants. The orchestrator mirrors every handoff as a typed envelope into the Band room — the room carries the full conversation log that the UI displays live.
 
-| Agent | Input | Output | LLM use | Deterministic core |
-| --- | --- | --- | --- | --- |
-| **Intake** | Raw case (text / form / JSON) | `StructuredCase` | Extraction (with local regex fallback) | Schema validation, field-level errors |
-| **Dating & Risk** | `StructuredCase` | `Finding` + `RiskFlag[]` | Imaging observation phrasing only | GA from LMP and ultrasound, discordance, risk evaluators |
-| **Guideline** | Structured case + findings + flags | `ComplianceResult` (+ veto) | None | Rulebook lookup, missing-investigation detection |
-| **Auditor** | Flags + `ComplianceResult` | `AuditorChallenge` | Challenge *narrative* only | `_should_challenge()` decides whether to challenge |
+| Agent             | Input                              | Output                      | LLM use                                | Deterministic core                                       |
+| ----------------- | ---------------------------------- | --------------------------- | -------------------------------------- | -------------------------------------------------------- |
+| **Intake**        | Raw case (text / form / JSON)      | `StructuredCase`            | Extraction (with local regex fallback) | Schema validation, field-level errors                    |
+| **Dating & Risk** | `StructuredCase`                   | `Finding` + `RiskFlag[]`    | Imaging observation phrasing only      | GA from LMP and ultrasound, discordance, risk evaluators |
+| **Guideline**     | Structured case + findings + flags | `ComplianceResult` (+ veto) | None                                   | Rulebook lookup, missing-investigation detection         |
+| **Auditor**       | Flags + `ComplianceResult`         | `AuditorChallenge`          | Challenge _narrative_ only             | `_should_challenge()` decides whether to challenge       |
 
-The **Auditor** is the design's distinctive move. Most multi-agent demos chain agents in series and trust the last one. Materna adds an adversary whose *decision to challenge is deterministic code* (`agents/auditor/agent.py:_should_challenge`) — the LLM only phrases the challenge. It fires when, for example, a high-severity flag coexists with a `compliant=True` verdict, or when a veto-eligible rule fired but the Guideline did not veto. The challenge cannot be hallucinated away because the trigger is structural.
+The **Auditor** is the design's distinctive move. Most multi-agent demos chain agents in series and trust the last one. Materna adds an adversary whose _decision to challenge is deterministic code_ (`agents/auditor/agent.py:_should_challenge`) — the LLM only phrases the challenge. It fires when, for example, a high-severity flag coexists with a `compliant=True` verdict, or when a veto-eligible rule fired but the Guideline did not veto. The challenge cannot be hallucinated away because the trigger is structural.
 
 ## 7. Case Lifecycle (State Machine)
 
@@ -306,17 +306,17 @@ flowchart LR
     DEV --> UC7
 ```
 
-| ID | Use case | Primary actor | Outcome |
-| --- | --- | --- | --- |
-| UC1 | Submit antenatal case | Clinic user | Case enters the lifecycle; pipeline runs |
-| UC2 | Extract from notes / ultrasound | Clinic user | Free text or image normalised into form fields |
-| UC3 | Watch agents collaborate | Clinic user | Live Band room view of typed handoffs |
-| UC4 | Review escalated case | OB reviewer | Evidence, flags, compliance, and draft plan presented |
-| UC5 | Approve / override | OB reviewer | Human decision recorded immutably |
-| UC6 | Download sealed packet | Clinic user / regulator | Signed, tamper-evident PDF |
-| UC7 | Verify audit chain | Regulator / developer | Pass/fail + exact break position |
-| UC8 | Run demo cases | Developer | All four scenarios executed end-to-end |
-| UC9 | Tamper detection demo | Developer | Chain break detected at exact sequence |
+| ID  | Use case                        | Primary actor           | Outcome                                               |
+| --- | ------------------------------- | ----------------------- | ----------------------------------------------------- |
+| UC1 | Submit antenatal case           | Clinic user             | Case enters the lifecycle; pipeline runs              |
+| UC2 | Extract from notes / ultrasound | Clinic user             | Free text or image normalised into form fields        |
+| UC3 | Watch agents collaborate        | Clinic user             | Live Band room view of typed handoffs                 |
+| UC4 | Review escalated case           | OB reviewer             | Evidence, flags, compliance, and draft plan presented |
+| UC5 | Approve / override              | OB reviewer             | Human decision recorded immutably                     |
+| UC6 | Download sealed packet          | Clinic user / regulator | Signed, tamper-evident PDF                            |
+| UC7 | Verify audit chain              | Regulator / developer   | Pass/fail + exact break position                      |
+| UC8 | Run demo cases                  | Developer               | All four scenarios executed end-to-end                |
+| UC9 | Tamper detection demo           | Developer               | Chain break detected at exact sequence                |
 
 ## 10. Data Model
 
@@ -408,14 +408,14 @@ Three primitives carry the entire safety promise. None of them is an LLM.
 
 ### 11.1 Deterministic escalation gate
 
-`orchestrator/gate.py` — the crown jewel, in full:
+`orchestrator/gate.py` — 13 lines, a pure function:
 
 ```python
 def must_escalate(flags: list[RiskFlag], compliance: ComplianceResult) -> bool:
     return bool(flags) or compliance.veto
 ```
 
-A pure function: no network, no database, no model, no side effects. Same inputs always yield the same output. It is called exactly once per case in the lifecycle, and there is no alternate route to a sealed-and-cleared state. The hardening suite includes adversarial tests that attempt to bypass it — including prompt-injection payloads embedded in case text — and all fail.
+No network, no database, no model, no side effects. Same inputs always yield the same output. Called exactly once per case; no alternate route to a sealed-and-cleared state exists. Adversarial tests (including prompt-injection payloads) confirm the gate itself cannot be tricked. Note: the gate is only as sound as its inputs — a bad extraction upstream could produce incorrect flags; the gate does not claim to catch that, only to enforce escalation correctly given the flags and compliance result it receives.
 
 ### 11.2 SHA-256 hash-chained audit log
 
@@ -444,12 +444,12 @@ The `POST /demo/tamper/{id}` endpoint deliberately corrupts a chain so a reviewe
 
 Risk evaluators (`risk/rules.py`) and GA math (`tools/ga_calc.py`) are deterministic, with thresholds sourced from `data/rules/antenatal_rules.yaml`:
 
-| Rule | Condition | Severity | Required investigations | Veto if missing |
-| --- | --- | --- | --- | --- |
-| PE-001 | BP ≥ 140/90 **and** urine protein in {1+, 2+, 3+} | high | repeat BP (4h), 24h urine protein | yes |
-| GDM-002 | fasting glucose ≥ 92 mg/dL | moderate | OGTT | yes |
-| ANE-003 | Hb < 11.0 g/dL | moderate | iron studies | no |
-| DATE-004 | LMP vs. ultrasound discordance ≥ 2.0 weeks | — | prefer ultrasound dating | — |
+| Rule     | Condition                                         | Severity | Required investigations           | Veto if missing |
+| -------- | ------------------------------------------------- | -------- | --------------------------------- | --------------- |
+| PE-001   | BP ≥ 140/90 **and** urine protein in {1+, 2+, 3+} | high     | repeat BP (4h), 24h urine protein | yes             |
+| GDM-002  | fasting glucose ≥ 92 mg/dL                        | moderate | OGTT                              | yes             |
+| ANE-003  | Hb < 11.0 g/dL                                    | moderate | iron studies                      | no              |
+| DATE-004 | LMP vs. ultrasound discordance ≥ 2.0 weeks        | —        | prefer ultrasound dating          | —               |
 
 GA is computed two ways and compared: from LMP `(ref - lmp).days / 7`, and from ultrasound biometry via Hadlock-style approximations for BPD, CRL, FL, HC, and AC. A discordance at or above the 2.0-week threshold is the classic, easily-missed signal Materna is built to never miss.
 
@@ -487,12 +487,12 @@ flowchart TB
     FAST -.best-effort.-> AIML
 ```
 
-| Component | Platform | Notes |
-| --- | --- | --- |
-| Backend | AWS EC2 (Uvicorn + FastAPI) | Single instance; state persisted to disk |
-| Frontend | Vercel (static React) | Edge rewrites proxy `/api` to backend |
-| Frontend fallback | EC2 nginx | Same-origin serving for redundancy |
-| Local | Docker Compose | `orchestrator` + `ui` services |
+| Component         | Platform                    | Notes                                    |
+| ----------------- | --------------------------- | ---------------------------------------- |
+| Backend           | AWS EC2 (Uvicorn + FastAPI) | Single instance; state persisted to disk |
+| Frontend          | Vercel (static React)       | Edge rewrites proxy `/api` to backend    |
+| Frontend fallback | EC2 nginx                   | Same-origin serving for redundancy       |
+| Local             | Docker Compose              | `orchestrator` + `ui` services           |
 
 ## 13. How To Use This Product
 
@@ -568,30 +568,30 @@ curl http://localhost:8000/cases/C-DEMO/audit    # audit chain + verification
 
 ### 13.6 Demo cases
 
-| Case | Scenario | Expected outcome |
-| --- | --- | --- |
+| Case   | Scenario                                                                          | Expected outcome                                                  |
+| ------ | --------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | C-0001 | 29y G3P2, BP 150/98, protein 2+, glucose 104, Hb 10.1; ~4.3 wk dating discordance | ESCALATED (PE-001 high, GDM-002, ANE-003) then sealed on decision |
-| C-0002 | 25y G1P0, normal vitals and labs | AUTO_CLEARED then sealed |
-| C-0003 | 34y G5P4, BP 142/92, protein 1+, glucose 95, Hb 10.5 | ESCALATED (triple flag) |
-| C-0004 | 22y G2P1, BP 165/105, protein 3+, Hb 9.2 | ESCALATED, auditor challenge |
+| C-0002 | 25y G1P0, normal vitals and labs                                                  | AUTO_CLEARED then sealed                                          |
+| C-0003 | 34y G5P4, BP 142/92, protein 1+, glucose 95, Hb 10.5                              | ESCALATED (triple flag)                                           |
+| C-0004 | 22y G2P1, BP 165/105, protein 3+, Hb 9.2                                          | ESCALATED, auditor challenge                                      |
 
 ## 14. API Reference
 
 Base URL: `http://localhost:8000`
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET | `/health` | Backend connectivity probe |
-| POST | `/extract` | Extract structured fields from clinical text |
-| POST | `/extract-image` | Vision extraction from an ultrasound image |
-| POST | `/cases` | Submit a case (multipart form; `case` = JSON string, optional image) |
-| GET | `/cases/{id}` | Case state: findings, flags, compliance, decision |
-| GET | `/cases/{id}/room` | Band room conversation (typed envelopes) |
-| POST | `/cases/{id}/decision` | Record human verdict (`approve`/`override` + note) |
-| GET | `/cases/{id}/packet` | Download the sealed PDF packet |
-| GET | `/cases/{id}/audit` | Audit chain + SHA-256 verification status |
-| POST | `/demo/tamper/{id}` | Deliberately corrupt a chain (tamper-detection demo) |
-| POST | `/demo/run-all` | Run all four demo cases and return results |
+| Method | Path                   | Purpose                                                              |
+| ------ | ---------------------- | -------------------------------------------------------------------- |
+| GET    | `/health`              | Backend connectivity probe                                           |
+| POST   | `/extract`             | Extract structured fields from clinical text                         |
+| POST   | `/extract-image`       | Vision extraction from an ultrasound image                           |
+| POST   | `/cases`               | Submit a case (multipart form; `case` = JSON string, optional image) |
+| GET    | `/cases/{id}`          | Case state: findings, flags, compliance, decision                    |
+| GET    | `/cases/{id}/room`     | Band room conversation (typed envelopes)                             |
+| POST   | `/cases/{id}/decision` | Record human verdict (`approve`/`override` + note)                   |
+| GET    | `/cases/{id}/packet`   | Download the sealed PDF packet                                       |
+| GET    | `/cases/{id}/audit`    | Audit chain + SHA-256 verification status                            |
+| POST   | `/demo/tamper/{id}`    | Deliberately corrupt a chain (tamper-detection demo)                 |
+| POST   | `/demo/run-all`        | Run all four demo cases and return results                           |
 
 ## 15. Project Structure
 
@@ -630,17 +630,17 @@ antenatal-review-board/
 
 ## 16. Tech Stack
 
-| Layer | Choice | Rationale |
-| --- | --- | --- |
-| Coordination | Band (SDK / Agent API / Human API) | The judged collaboration layer; rooms + recruitment + human gate |
-| Model inference | AI/ML API via OpenRouter (gpt-4o-mini) | Unified model access for extraction and narratives only |
-| Orchestrator / agents | Python 3.11 + FastAPI | Async-friendly; clean REST surface |
-| Schemas | Pydantic v2 | Single source of truth; validated at every boundary |
-| Imaging | Gemini Vision via AI/ML API | Decision-support; no model training required |
-| Packet | ReportLab | Professional clinical PDF output |
-| Audit | hashlib (SHA-256) + JSONL | Tamper-evidence without a blockchain |
-| UI | React 18 + Vite + Tailwind v3 + Framer Motion + lucide-react | Glass-morphism design system; progressive disclosure |
-| Packaging | Docker Compose | Single-host deploy |
+| Layer                 | Choice                                                       | Rationale                                                        |
+| --------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Coordination          | Band (SDK / Agent API / Human API)                           | The judged collaboration layer; rooms + recruitment + human gate |
+| Model inference       | AI/ML API via OpenRouter (gpt-4o-mini)                       | Unified model access for extraction and narratives only          |
+| Orchestrator / agents | Python 3.11 + FastAPI                                        | Async-friendly; clean REST surface                               |
+| Schemas               | Pydantic v2                                                  | Single source of truth; validated at every boundary              |
+| Imaging               | Gemini Vision via AI/ML API                                  | Decision-support; no model training required                     |
+| Packet                | ReportLab                                                    | Professional clinical PDF output                                 |
+| Audit                 | hashlib (SHA-256) + JSONL                                    | Tamper-evidence without a blockchain                             |
+| UI                    | React 18 + Vite + Tailwind v3 + Framer Motion + lucide-react | Glass-morphism design system; progressive disclosure             |
+| Packaging             | Docker Compose                                               | Single-host deploy                                               |
 
 ## 17. Testing
 
