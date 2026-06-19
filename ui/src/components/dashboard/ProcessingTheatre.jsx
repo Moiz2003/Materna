@@ -90,14 +90,14 @@ export default function ProcessingTheatre({ status, startedAt }) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      <GlassPanel glow="teal" intensity={0.6} depth="overlay" className="p-8">
+      <GlassPanel glow="teal" intensity={0.6} depth="overlay" className="p-5 sm:p-8">
         {/* Header row — title + elapsed */}
-        <div className="flex items-center justify-between mb-7">
+        <div className="flex items-center justify-between mb-5 sm:mb-7">
           <div>
-            <h3 className="font-display font-semibold text-lg text-text">
+            <h3 className="font-display font-semibold text-base sm:text-lg text-text">
               Coordinating the review board
             </h3>
-            <p className="text-sm text-text-muted mt-0.5">
+            <p className="text-xs sm:text-sm text-text-muted mt-0.5">
               Four specialist agents analysing through Band
             </p>
           </div>
@@ -109,7 +109,7 @@ export default function ProcessingTheatre({ status, startedAt }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
                 transition={{ duration: 0.15 }}
-                className="text-xl font-mono font-bold text-teal-400 tabular-nums"
+                className="text-lg sm:text-xl font-mono font-bold text-teal-400 tabular-nums"
               >
                 {elapsed.toFixed(1)}s
               </motion.span>

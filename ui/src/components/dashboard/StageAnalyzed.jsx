@@ -10,9 +10,9 @@ import GlassPanel from '../ui/glass-panel';
 function GaCell({ label, value, tone = 'teal', icon }) {
   const color = tone === 'amber' ? 'text-amber-400' : tone === 'success' ? 'text-success' : 'text-teal-400';
   return (
-    <div className="text-center px-3 py-2.5">
-      <div className="text-xs text-text-subtle uppercase tracking-wide">{label}</div>
-      <div className={`font-display font-bold text-2xl ${color} mt-1 flex items-center justify-center gap-1.5`}>
+    <div className="text-center px-2 sm:px-3 py-2 sm:py-2.5">
+      <div className="text-[10px] sm:text-xs text-text-subtle uppercase tracking-wide">{label}</div>
+      <div className={`font-display font-bold text-xl sm:text-2xl ${color} mt-1 flex items-center justify-center gap-1.5`}>
         {value}{icon}
       </div>
     </div>
@@ -74,10 +74,10 @@ export default function StageAnalyzed({ finding = {}, flags = [] }) {
 
   return (
     <FadeIn>
-      <GlassPanel glow={hasFlags ? 'amber' : 'emerald'} intensity={hasFlags ? 0.4 : 0.25} className="p-5 space-y-4">
+      <GlassPanel glow={hasFlags ? 'amber' : 'emerald'} intensity={hasFlags ? 0.4 : 0.25} className="p-4 sm:p-5 space-y-3 sm:space-y-4">
         <div className="flex items-center gap-2.5">
-          <CalendarClock size={18} className="text-teal-400" />
-          <h3 className="font-display font-semibold text-base text-text">Dating & risk</h3>
+          <CalendarClock size={16} className="text-teal-400 flex-shrink-0" />
+          <h3 className="font-display font-semibold text-sm sm:text-base text-text">Dating & risk</h3>
         </div>
 
         {hasGa && (
@@ -118,8 +118,8 @@ export default function StageAnalyzed({ finding = {}, flags = [] }) {
                       className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-bg-dark/50 transition-colors text-left cursor-pointer"
                     >
                       <span className={`w-2 h-2 rounded-full ${s.dot} flex-shrink-0`} />
-                      <span className={`text-xs font-bold ${s.text} w-10`}>{s.label}</span>
-                      <span className="text-sm font-semibold text-text flex-1">{info.title}</span>
+                      <span className={`text-[10px] sm:text-xs font-bold ${s.text} w-8 sm:w-10`}>{s.label}</span>
+                      <span className="text-xs sm:text-sm font-semibold text-text flex-1">{info.title}</span>
                       {fl.rule_ref && (
                         <span className="text-xs text-text-subtle font-mono bg-bg-dark/60 px-1.5 py-0.5 rounded">
                           {fl.rule_ref}
