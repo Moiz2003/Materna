@@ -10,3 +10,7 @@ dist/
 
 # Runtime case state (persisted across reloads)
 data/state/
+
+# Design docs and planning (keep README.md public)
+*.md
+!README.md

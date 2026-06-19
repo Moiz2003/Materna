@@ -494,44 +494,6 @@ async def handle_case_local(raw_case: dict | str) -> dict:
             _persist_state(state)
             return state
 
-        # --- Auto-clear: seal immediately (no escalation needed) ---
-        state["human_decision"] = {
-            "decision_id": f"D-AUTO-{case_id}",
-            "case_id": case_id,
-            "reviewer": "SYSTEM (auto-cleared)",
-            "verdict": "approve",
-            "note": "No risk flags or veto — auto-cleared per deterministic gate.",
-            "decided_at": datetime.now(timezone.utc).isoformat(),
-        }
-        append_entry(case_id, "human", "decided", {"verdict": "approve", "auto": True})
-
-        final_hash = _compute_final_hash(case_id)
-        state["final_hash"] = final_hash
-
-        from packet.generator import build_packet
-        try:
-            packet_path = await build_packet(
-                case=raw_case,
-                findings=[finding] if finding else [],
-                flags=flags_data,
-                decision=state["human_decision"],
-                final_hash=final_hash,
-                compliance=compliance,
-            )
-            state["packet_ref"] = packet_path
-        except Exception as e:
-            logger.warning(f"[{case_id}] Packet generation failed (non-fatal): {e}")
-            state["packet_ref"] = f"packets/{case_id}.pdf (generation pending)"
-
-        state["status"] = CaseStatus.SEALED
-        append_entry(case_id, "orchestrator", "sealed", {"final_hash": final_hash})
-        logger.info(f"[{case_id}] Status: SEALED ✅")
-
-        ok, broken = verify_chain(case_id)
-        state["audit_verified"] = ok
-        if not ok:
-            logger.warning(f"[{case_id}] Audit chain BROKEN at seq {broken}!")
-
     except Exception as e:
         logger.exception(f"[{case_id}] Lifecycle error: {e}")
         state["status"] = CaseStatus.QUARANTINED
