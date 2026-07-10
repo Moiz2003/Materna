@@ -17,12 +17,13 @@ import base64
 import json
 import logging
 import os
+import secrets as _secrets
 
 import httpx
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, BackgroundTasks
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
@@ -38,19 +39,71 @@ from schemas import RiskFlag
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Security — Internal secret gate
+# ---------------------------------------------------------------------------
+# Every request MUST carry the matching X-Materna-Secret header.
+# The Clinify Express proxy sets this header; browsers never see the secret.
+#
+# FAIL-CLOSED: When MATERNA_INTERNAL_SECRET is unset, ALL requests are rejected
+# with 503 unless MATERNA_DEMO_MODE=1 is explicitly set (for hackathon/local dev).
+# This prevents accidental open deployments.
+_INTERNAL_SECRET: str = os.getenv("MATERNA_INTERNAL_SECRET", "")
+_DEMO_MODE: bool = os.getenv("MATERNA_DEMO_MODE", "0") == "1"
+
 app = FastAPI(
     title="Antenatal Review Board",
     description="Band-coordinated multi-agent obstetric review with human-in-the-loop gate.",
     version="0.1.0",
 )
 
+# CORS — restrict to Clinify backend origins.
+# In demo mode (MATERNA_DEMO_MODE=1), allow "*" so the standalone demo works.
+# In production, only the configured origins are allowed.
+_allowed_origins_raw = os.getenv("MATERNA_ALLOWED_ORIGINS", "")
+if _DEMO_MODE and not _allowed_origins_raw:
+    _cors_origins: list[str] = ["*"]
+else:
+    _cors_origins: list[str] = (
+        [o.strip() for o in _allowed_origins_raw.split(",") if o.strip()]
+        if _allowed_origins_raw
+        else []  # fail-closed: no origins unless explicitly configured
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def _internal_secret_gate(request: Request, call_next):
+    """Reject any request that doesn't carry the correct internal secret.
+
+    FAIL-CLOSED: When MATERNA_INTERNAL_SECRET is not configured, ALL requests
+    are rejected (503) unless MATERNA_DEMO_MODE=1 is explicitly set.
+    This prevents accidentally deploying an unprotected Materna instance.
+    """
+    if not _INTERNAL_SECRET:
+        if _DEMO_MODE:
+            return await call_next(request)
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": "Materna internal secret not configured. "
+                          "Set MATERNA_INTERNAL_SECRET or MATERNA_DEMO_MODE=1 for local dev."
+            },
+        )
+
+    incoming = request.headers.get("X-Materna-Secret", "")
+    # Constant-time comparison prevents timing attacks
+    if not _secrets.compare_digest(incoming, _INTERNAL_SECRET):
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+
+    return await call_next(request)
 
 
 # ---------------------------------------------------------------------------

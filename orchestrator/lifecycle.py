@@ -533,10 +533,11 @@ async def handle_case(raw_case: dict) -> str:
 
 def _compute_final_hash(case_id: str) -> str:
     """Compute the final hash from the audit chain."""
-    ok, _ = verify_chain(case_id)
+    safe_id = _sanitize_id(case_id)
+    ok, _ = verify_chain(safe_id)
     if ok:
         # Read last entry's this_hash
-        audit_path = Path(__file__).parent.parent / "audit_log" / f"{case_id}.jsonl"
+        audit_path = Path(__file__).parent.parent / "audit_log" / f"{safe_id}.jsonl"
         if audit_path.exists():
             lines = audit_path.read_text().strip().splitlines()
             if lines:

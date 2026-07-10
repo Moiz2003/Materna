@@ -1,12 +1,17 @@
 """packet/generator.py — Professional clinical PDF (ReportLab)."""
 from __future__ import annotations
 import logging
+import re as _re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 PACKETS_DIR = Path(__file__).parent.parent / "packets"
+
+def _sanitize_filename(raw: str) -> str:
+    """Strip path traversal and limit length for safe file names."""
+    return _re.sub(r'[^A-Za-z0-9\-]', '', raw)[:64]
 
 INVESTIGATION_LABELS = {
     "repeat_bp_4h": "Repeat blood pressure after 4 hours",
@@ -65,7 +70,7 @@ class BarFlowable(Flowable):
 async def build_packet(case, findings, flags, decision, final_hash, compliance=None, plan=None):
     if not HAS_REPORTLAB: return _text_fallback(case, findings, flags, decision, final_hash, compliance, plan)
     PACKETS_DIR.mkdir(parents=True, exist_ok=True)
-    cid = case.get("case_id", "unknown")
+    cid = _sanitize_filename(case.get("case_id", "unknown"))
     path = PACKETS_DIR / f"{cid}.pdf"
     comp = compliance or {}; pl = plan or {}
     fdata = {}
@@ -229,7 +234,7 @@ async def build_packet(case, findings, flags, decision, final_hash, compliance=N
 def _text_fallback(case, findings, flags, decision, final_hash, comp=None, plan=None):
     import json
     PACKETS_DIR.mkdir(parents=True, exist_ok=True)
-    cid = case.get("case_id","unknown")
+    cid = _sanitize_filename(case.get("case_id","unknown"))
     p = PACKETS_DIR / f"{cid}.txt"
     p.write_text("\n".join(["MATERNA REVIEW", f"Case: {cid}", json.dumps(case, indent=2, default=str), "",
                             json.dumps(findings, indent=2, default=str), "", json.dumps(flags, indent=2, default=str), "",

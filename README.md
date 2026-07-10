@@ -10,7 +10,7 @@ Built for the Band of Agents Hackathon (Track 3 — Regulated & High-Stakes Work
 | ---------------------- | ---------------------------------------------------------------------------- |
 | **Domain**             | Antenatal (obstetric) care coordination and triage                           |
 | **Coordination layer** | Band (Agent API + Human API + Rooms)                                         |
-| **Safety model**       | Deterministic escalation gate + immutable audit chain + mandatory human gate |
+| **Safety model**       | Deterministic escalation gate + tamper-evident audit chain + mandatory human gate |
 | **Data**               | Synthetic / anonymised only — no real PHI                                    |
 | **Status**             | Hackathon build; live reference deployment on AWS + Vercel                   |
 
@@ -73,19 +73,19 @@ The key property: **the decision to involve a human is structural, not probabili
 | Stakeholder               | Value delivered                                                                                                                                                                  |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Clinician**             | Removes the per-case reconciliation toil (GA math, lab thresholds, missing-test checks). Surfaces only the cases that genuinely need judgement, with the evidence pre-assembled. |
-| **Patient**               | Raises the floor on detection. A tired clinician can miss a 4-week dating discordance; a pure function cannot.                                                                   |
+| **Patient**               | Raises the floor on detection. A tired clinician can overlook a 4-week dating discordance; a deterministic check applies the same threshold to every case.                       |
 | **Clinic / system owner** | Produces a tamper-evident, signed record for every case — defensible under audit, and a foundation for quality metrics.                                                          |
 | **Regulator**             | The escalation decision is inspectable code, the audit chain is verifiable, and the human always holds final authority. There is no autonomous diagnostic claim to certify.      |
 
 What makes this credible rather than aspirational:
 
-- **The safety guarantee is testable.** The escalation gate is a pure function with adversarial tests proving it cannot be bypassed.
+- **The safety guarantee is testable.** The escalation gate is a pure function, with adversarial tests that verify it cannot be tricked into clearing a flagged case.
 - **The math is code, not vibes.** Gestational age, risk thresholds, and guideline checks are deterministic functions reading from a declarative rulebook — same input, same output, every time.
 - **It degrades safely.** If Band is offline, if the LLM has no credits, the case is still reviewed and still escalated correctly. Band and the LLM add visibility and ergonomics, never safety.
 
 ## 4. Design Principles
 
-These eight rules are enforced throughout the codebase, several of them by tests that fail CI on violation.
+These eight rules are enforced throughout the codebase, several of them directly by the test suite — a violation fails the relevant test (`pytest tests/`).
 
 1. **Band carries every inter-agent envelope as a shared context log.** The orchestrator drives agents directly (local-mode fallback preserves safety), mirroring every handoff — StructuredCase, Finding, ComplianceResult, AuditorChallenge — into the Band room as typed envelopes. When Band is available, the room is visible and auditable. When Band is unavailable, the pipeline runs with identical safety behaviour. Band adds visibility, coordination surface, and the Human API gate; safety does not depend on it.
 2. **The escalation gate is deterministic.** `must_escalate()` is a pure function. An LLM never decides whether to escalate.
@@ -408,7 +408,7 @@ Three primitives carry the entire safety promise. None of them is an LLM.
 
 ### 11.1 Deterministic escalation gate
 
-`orchestrator/gate.py` — 13 lines, a pure function:
+`orchestrator/gate.py` — a pure function with a single-expression body:
 
 ```python
 def must_escalate(flags: list[RiskFlag], compliance: ComplianceResult) -> bool:
@@ -451,7 +451,7 @@ Risk evaluators (`risk/rules.py`) and GA math (`tools/ga_calc.py`) are determini
 | ANE-003  | Hb < 11.0 g/dL                                    | moderate | iron studies                      | no              |
 | DATE-004 | LMP vs. ultrasound discordance ≥ 2.0 weeks        | —        | prefer ultrasound dating          | —               |
 
-GA is computed two ways and compared: from LMP `(ref - lmp).days / 7`, and from ultrasound biometry via Hadlock-style approximations for BPD, CRL, FL, HC, and AC. A discordance at or above the 2.0-week threshold is the classic, easily-missed signal Materna is built to never miss.
+GA is computed two ways and compared: from LMP `(ref - lmp).days / 7`, and from ultrasound biometry via Hadlock-style approximations for BPD, CRL, FL, HC, and AC. A discordance at or above the 2.0-week threshold is the classic, easily-missed signal Materna is built specifically to surface — deterministically, whenever both dates are present.
 
 ## 12. Deployment Architecture
 
