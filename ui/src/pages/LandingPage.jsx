@@ -14,6 +14,8 @@ import ScalabilityPotential from './sections/ScalabilityPotential';
 import CTASection from './sections/CTASection';
 import FooterSection from './sections/FooterSection';
 
+const CLINIFY_URL = import.meta.env.VITE_CLINIFY_URL || 'https://www.gynaecarecenter.com';
+
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
@@ -36,6 +38,12 @@ export default function LandingPage() {
             <Link to="/dashboard" className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-semibold text-sm no-underline transition-all shadow-lg shadow-teal-500/20">
               Launch App
             </Link>
+            <button
+              onClick={() => { window.location.href = `${CLINIFY_URL}/doctor/materna?exit=1`; }}
+              className="px-3 py-2 text-xs text-text-muted hover:text-text border border-border hover:border-teal-500/40 rounded-lg transition-colors"
+            >
+              ← Clinify Dashboard
+            </button>
           </div>
           {/* Mobile hamburger */}
           <button
