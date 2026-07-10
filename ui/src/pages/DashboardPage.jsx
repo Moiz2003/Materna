@@ -34,6 +34,8 @@ import {
   isAwaitingDecision, isComplete, DEMO_CASES,
 } from '../components/dashboard/caseModel';
 
+const CLINIFY_URL = import.meta.env.VITE_CLINIFY_URL || 'https://www.gynaecarecenter.com';
+
 export default function DashboardPage() {
   // ── case lifecycle state (unchanged contract) ──
   const [caseId, setCaseId] = useState('');
@@ -263,6 +265,12 @@ export default function DashboardPage() {
                 <Stethoscope size={15} className="text-teal-400" /> {reviewer}
               </span>
               <Link to="/about" className="text-text-muted hover:text-text no-underline transition-colors hidden sm:inline">About</Link>
+              <button
+                onClick={() => { window.location.href = `${CLINIFY_URL}/doctor/materna?exit=1`; }}
+                className="px-3 py-1.5 text-xs font-semibold text-teal-400 border border-teal-500/30 hover:border-teal-400 hover:bg-teal-500/10 rounded-lg transition-colors"
+              >
+                ← Clinify Dashboard
+              </button>
             </div>
           </div>
         </nav>
