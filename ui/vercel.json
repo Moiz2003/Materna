@@ -1,11 +1,11 @@
 {
   "rewrites": [
-    { "source": "/health", "destination": "http://18.141.162.123:8000/health" },
-    { "source": "/cases", "destination": "http://18.141.162.123:8000/cases" },
-    { "source": "/cases/:path*", "destination": "http://18.141.162.123:8000/cases/:path*" },
-    { "source": "/extract", "destination": "http://18.141.162.123:8000/extract" },
-    { "source": "/extract-image", "destination": "http://18.141.162.123:8000/extract-image" },
-    { "source": "/demo/:path*", "destination": "http://18.141.162.123:8000/demo/:path*" },
+    { "source": "/health", "destination": "http://204.168.211.203:8000/health" },
+    { "source": "/cases", "destination": "http://204.168.211.203:8000/cases" },
+    { "source": "/cases/:path*", "destination": "http://204.168.211.203:8000/cases/:path*" },
+    { "source": "/extract", "destination": "http://204.168.211.203:8000/extract" },
+    { "source": "/extract-image", "destination": "http://204.168.211.203:8000/extract-image" },
+    { "source": "/demo/:path*", "destination": "http://204.168.211.203:8000/demo/:path*" },
     { "source": "/((?!assets).*)", "destination": "/index.html" }
   ]
 }
